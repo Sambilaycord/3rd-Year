@@ -1,0 +1,52 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+df_mushroom = pd.read_csv('mushroom_cleaned.csv')
+df_mushroom.head()
+df_mushroom.describe()
+
+
+#Logistic Regression
+# Rename the 'class' column to avoid conflict
+df_mushroom.rename(columns={'class': 'mushroom_class'}, inplace=True)
+
+X = df_mushroom.drop(['mushroom_class'], axis=1)
+y = df_mushroom.mushroom_class
+
+X_train2, X_test2, y_train2, y_test2 = train_test_split(X, y, random_state = 123, test_size=0.2)
+
+lrc = LogisticRegression().fit(X_train2, y_train2)
+lrc_preds = lrc.predict(X_test2)
+
+print(f'Logistic Regression Accuracy: {accuracy_score(y_test2.values, lrc_preds) * 100}%')
+
+conf_matrix = confusion_matrix(y_test2.values, lrc_preds)
+classification_rep = classification_report(y_test2.values, lrc_preds)
+
+print(f"Confusion Matrix: \n{conf_matrix}")
+print(f"Classification reprot: \n{classification_rep}")
+
+
+from sklearn.tree import DecisionTreeClassifier
+
+dtc = DecisionTreeClassifier(random_state = 123).fit(X_train2, y_train2)
+dtc_preds = dtc.predict(X_test2)
+
+print(f"Decision Trees Classifier Accuracy: {accuracy_score(y_test2.values, dtc_preds) * 100}")
+
+conf_matrix2 = confusion_matrix(y_test2.values, dtc_preds)
+classification_rep2 = classification_report(y_test2.values, dtc_preds)
+
+print(f"Confusion Matrix: \n {conf_matrix2}")
+print(f"Classification Reprot: \n {classification_rep2}")
+
+print("\nInterpretation of Results")
+print("The Decision Tree Classifier performs better than the Logistic Regression model, with an accuracy that is about 33.95% higher (97.59% vs 68.75%).")
+print("This suggest that the decision tree is able to capture more patterns in the data that lead to correct classifications")
