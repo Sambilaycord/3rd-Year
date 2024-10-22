@@ -9,9 +9,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.datasets import load_diabetes
 
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.tree import DecisionTreeRegressor
 
+# Load the diabetes dataset
 data = load_diabetes(as_frame=True)
 
 print("The features are: ", data.feature_names)
@@ -34,7 +34,6 @@ fig.text(0.1, 0.5, 'Diabetes Progression', va='center', rotation='vertical')
 # Display the plot
 #plt.show()
 
-
 # Features (X) and target (y)
 X = df_d.iloc[:, :-1].values
 y = df_d.iloc[:, -1]
@@ -50,63 +49,38 @@ X_train1, X_test1, y_train1, y_test1 = train_test_split(X, y, test_size=0.2, ran
 print("\nTrain data size: ", X_train1.shape, y_train1.shape)
 print("Test data size: ", X_test1.shape, y_test1.shape)
 
+
+###### Linear Regression ######
 lr_rmodel = LinearRegression().fit(X_train1, y_train1)
 
-print("LR Model Coefficients: ", lr_rmodel.coef_)
-print("LR Model Intercept: ", lr_rmodel.intercept_)
+print("Linear Regression Model Coefficients: ", lr_rmodel.coef_)
+print("Linear Regression Model Intercept: ", lr_rmodel.intercept_)
 
 mse_lr = mean_squared_error(y_test1, lr_rmodel.predict(X_test1))
 print("\nLinear Regression Mean Squared Error is: ", mse_lr)
 
 
+###### Decision Tree Regressor ######
+# Train a Decision Tree Regressor on the training data
+dt_regressor = DecisionTreeRegressor(random_state=123).fit(X_train1, y_train1)
+
+# Make predictions on the test set using the Decision Tree Regressor
+dt_preds = dt_regressor.predict(X_test1)
+
+# Calculate and store Decision Tree Regressor mean squared error
+mse_dt = mean_squared_error(y_test1, dt_preds)
+print(f"Decision Tree Regressor Mean Squared Error: {mse_dt}")
 
 
-# Split the dataset into training and testing sets (80% train, 20% test)
-X_train2, X_test2, y_train2, y_test2 = train_test_split(X, y, random_state = 123, test_size=0.2)
+###### Interpretation of Results ######
+mse_diff = mse_dt - mse_lr
 
-# Train a Logistic Regression model on the training data
-lrc = LogisticRegression().fit(X_train2, y_train2)
-
-# Make predictions on the test set
-lrc_preds = lrc.predict(X_test2)
-
-# Calculate and display Logistic Regression model accuracy
-print(f'Logistic Regression Accuracy: {accuracy_score(y_test2.values, lrc_preds) * 100}%')
-
-
-# Generate the confusion matrix for the Logistic Regression model
-conf_matrix = confusion_matrix(y_test2.values, lrc_preds)
-
-
-# Generate the classification report for Logistic Regression model
-classification_rep = classification_report(y_test2.values, lrc_preds)
-
-# Display the confusion matrix and classification report
-print(f"Confusion Matrix: \n{conf_matrix}")
-print(f"Classification reprot: \n{classification_rep}")
-
-
-
-
-###### Decision Tree Classifier ###### 
-# Train a Decision Tree Classifier on the training data
-from sklearn.tree import DecisionTreeClassifier
-dtc = DecisionTreeClassifier(random_state = 123).fit(X_train2, y_train2)
-
-
-# Make predictions on the test set using the Decision Tree model
-dtc_preds = dtc.predict(X_test2)
-
-# Calculate and display Decision Tree Classifier model accuracy
-print(f"Decision Trees Classifier Accuracy: {accuracy_score(y_test2.values, dtc_preds) * 100}")
-
-
-# Generate the confusion matrix for the Decision Tree Classifier model
-conf_matrix2 = confusion_matrix(y_test2.values, dtc_preds)
-
-# Generate the classification report for the Decision Tree Classifier model
-classification_rep2 = classification_report(y_test2.values, dtc_preds)
-
-# Display the confusion matrix and classification report for the Decision Tree model
-print(f"Confusion Matrix: \n {conf_matrix2}")
-print(f"Classification Reprot: \n {classification_rep2}")
+print("\nInterpretation of Results")
+if mse_lr < mse_dt:
+    print(f"The Linear Regression model has a lower Mean Squared Error ({mse_lr:.2f}) than the Decision Tree Regressor ({mse_dt:.2f}).")
+    print("This suggests that the Linear Regression model performed better in this scenario.")
+elif mse_lr > mse_dt:
+    print(f"The Decision Tree Regressor has a lower Mean Squared Error ({mse_dt:.2f}) compared to the Linear Regression model ({mse_lr:.2f}).")
+    print("This indicates that the Decision Tree model performed better in capturing the patterns in the data.")
+else:
+    print("Both models have the same Mean Squared Error, indicating similar performance in this scenario.")
